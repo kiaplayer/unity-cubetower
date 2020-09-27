@@ -31,7 +31,25 @@ public class CanvasButtons : MonoBehaviour
         }
         Application.OpenURL("https://www.instagram.com/kiaplayer/");
     }
+    
+    public void LoadShop()
+    {
+        if (PlayerPrefs.GetString("music") != "No")
+        {
+            GetComponent<AudioSource>().Play();
+        }
+        SceneManager.LoadScene("Shop");
+    }
 
+    public void CloseShop()
+    {
+        if (PlayerPrefs.GetString("music") != "No")
+        {
+            GetComponent<AudioSource>().Play();
+        }
+        SceneManager.LoadScene("Main");
+    }   
+    
     public void MusicWork()
     {
         if (PlayerPrefs.GetString("music") == "No")

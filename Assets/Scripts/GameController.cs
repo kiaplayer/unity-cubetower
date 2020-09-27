@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,7 +11,9 @@ public class GameController : MonoBehaviour
     public float cubeChangePlaceSpeed = 0.5f;
     public Transform cubeToPlace;
     private float camMoveToYPosition, camMoveSpeed = 2f;
-    public GameObject cubeToCreate, allCubes, vfx;
+    public Text scoreTxt;
+    public GameObject[] cubesToCreate;
+    public GameObject allCubes, vfx;
     public GameObject[] canvasStartPage;
     private Rigidbody allCubesRb;
     private bool isLose, firstCube;
@@ -34,8 +37,12 @@ public class GameController : MonoBehaviour
     private int prevCountMaxHorizontal;
     private Transform mainCam;
 
+    private List<GameObject> possibleCubesToCreate = new List<GameObject>();
+
     private void Start()
     {
+        AddPossibleCubes(PlayerPrefs.GetInt("score") / 5);
+        scoreTxt.text = "<size=40><color=#E05156>best:</color></size> " + PlayerPrefs.GetInt("score") + "\n<size=22>now:</size> 0";
         toCameraColor = Camera.main.backgroundColor;
         mainCam = Camera.main.transform;
         camMoveToYPosition = 5.9f + nowCube.y - 1f;
@@ -60,7 +67,13 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            GameObject newCube = Instantiate(cubeToCreate, cubeToPlace.position, Quaternion.identity);
+            GameObject createCube = null;
+            if (possibleCubesToCreate.Count == 1)
+                createCube = possibleCubesToCreate[0];
+            else
+                createCube = cubesToCreate[UnityEngine.Random.Range(0, possibleCubesToCreate.Count)];
+            
+            GameObject newCube = Instantiate(createCube, cubeToPlace.position, Quaternion.identity);
             newCube.transform.SetParent(allCubes.transform);
             nowCube.SetVector(cubeToPlace.position);
             allCubesPositions.Add(nowCube.GetVector());
@@ -149,6 +162,15 @@ public class GameController : MonoBehaviour
             if (Mathf.Abs(Convert.ToInt32(pos.z)) > maxZ)
                 maxZ = Convert.ToInt32(pos.z);
         }
+
+
+        if (PlayerPrefs.GetInt("score") < maxY - 1)
+        {
+            PlayerPrefs.SetInt("score", maxY - 1);
+        }
+        
+        scoreTxt.text = "<size=40><color=#E05156>best:</color></size> " + PlayerPrefs.GetInt("score") + "\n<size=22>now:</size> " + (maxY - 1);
+        
         camMoveToYPosition = 5.9f + nowCube.y - 1f;
 
         maxHor = maxX > maxZ ? maxX : maxZ;
@@ -166,6 +188,14 @@ public class GameController : MonoBehaviour
             toCameraColor = bgColors[1];
         else if (maxY >= 5)
             toCameraColor = bgColors[0];
+    }
+    
+    private void AddPossibleCubes(int till)
+    {
+        for (int i = 0; i <= till && i < cubesToCreate.Length; i++)
+        {
+            possibleCubesToCreate.Add(cubesToCreate[i]);
+        }
     }
 }
 
